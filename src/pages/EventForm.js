@@ -17,6 +17,7 @@ import EventWebsitePromotion from "./EventWebsitePromotion";
 import OrganizerDetails from "./OrganizerDetails";
 import TitleBackGroundImage from "../images/event-list.jpg";
 import { useNavigate } from "react-router-dom";
+import Papa from "papaparse";
 
 const steps = [
   { title: "Basic Information", component: BasicInformation },
@@ -27,6 +28,7 @@ const steps = [
 ];
 
 const EventForm = () => {
+  const [getEmailsCSVData, setEmailsCSVData] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
   const navigate = useNavigate();
 
@@ -38,14 +40,23 @@ const EventForm = () => {
     formState: { errors },
   } = useForm();
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    Papa.parse(file, {
+      header: true,
+      complete: (result) => {
+        setEmailsCSVData(result.data);
+      },
+      error: (error) => {
+        console.error("Error parsing CSV:", error);
+      },
+    });
+  };
+
   const onSubmit = (data) => console.log(data);
 
   const handleNext = async () => {
-    if (activeStep === 0) {
-      onSubmitStep0();
-    } else if (activeStep === 1) {
-      onSubmitStep1();
-    }
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () =>
@@ -61,32 +72,17 @@ const EventForm = () => {
 
   const handleSaveForLater = async () => {
     const data = getValues();
+    const emails = data?.attendeeEmail?.split("\n");
+    //handleFileUpload(data?.attendeeEmailCsv);
+    console.log(data?.attendeeEmailCsv);
     console.log(data);
+    //console.log(getEmailsCSVData);
   };
 
   const handleBlur = async (fieldName) => {
     try {
       await trigger(fieldName);
     } catch (error) {}
-  };
-
-  const onSubmitStep0 = async (data) => {
-    try {
-      await trigger(["title", "description"]);
-      await setActiveStep(1);
-    } catch (error) {}
-  };
-
-  const onSubmitStep1 = async (data) => {
-    try {
-      await trigger(["email", "password"]);
-      await setActiveStep(2);
-    } catch (error) {}
-  };
-
-  const onSubmitStep2 = (data) => {
-    // Form submission logic for step 3
-    console.log("Form submitted with data:", data);
   };
 
   return (
@@ -132,7 +128,7 @@ const EventForm = () => {
           </Stepper>
           <Grid container mt={5} mb={5}>
             <StepContent
-              step={steps[activeStep].component}
+              step={steps[activeStep]?.component}
               register={register}
               errors={errors}
               handleBlur={handleBlur}

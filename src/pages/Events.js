@@ -19,6 +19,7 @@ import AlertMessage from "../components/AlertMessage";
 import { eventsRequest } from "../redux/Events/action";
 import { useTheme } from "@mui/material/styles";
 import QRCode from "qrcode.react";
+import { PieChart, Pie, Tooltip, Legend, Cell } from "recharts";
 
 const styles = {
   link: {
@@ -46,7 +47,7 @@ export default function Events() {
   }, []);
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 1 },
+    { field: "id", headerName: "ID", flex: 1, width: 100 },
     { field: "title", headerName: "Title", flex: 1 },
     { field: "mode", headerName: "Mode", flex: 1 },
     { field: "locationType", headerName: "Location", flex: 1 },
@@ -97,7 +98,12 @@ export default function Events() {
       ),
     },
   ];
-
+  const data = [
+    { name: "Category A", value: 400 },
+    { name: "Category B", value: 300 },
+    { name: "Category C", value: 200 },
+    { name: "Category D", value: 100 },
+  ];
   return (
     <>
       <Box
@@ -114,6 +120,25 @@ export default function Events() {
           List Events
         </Typography>
       </Box>
+      <PieChart width={400} height={400}>
+        <Pie
+          data={data}
+          cx={200}
+          cy={200}
+          outerRadius={80}
+          fill="#8884d8"
+          label
+        >
+          {data.map((entry, index) => (
+            <Cell
+              key={`cell-${index}`}
+              fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`}
+            />
+          ))}
+        </Pie>
+        <Tooltip />
+        <Legend />
+      </PieChart>
       <Box p={3}>
         <AlertMessage />
         <Box
